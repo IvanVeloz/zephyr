@@ -74,11 +74,8 @@ static int i2sc_sam0_trigger(const struct device *dev, enum i2s_dir dir,
 static int i2sc_sam0_initialize(const struct device *dev)
 {
 	const struct i2sc_sam0_cfg *cfg = dev->config;
-	int ret;
 	LOG_DBG("REV_I2S = 0x%08x", REV_I2S);
-	ret = pinctrl_apply_state(cfg->pcfg, PINCTRL_STATE_DEFAULT);
-	LOG_DBG("pinctrl_apply_state returned %i",ret);
-	return ret;
+	return 0;
 }
 
 static const struct i2sc_sam0_driver_api_t i2sc_sam0_driver_api = {
@@ -92,10 +89,8 @@ static const struct i2sc_sam0_driver_api_t i2sc_sam0_driver_api = {
 };
 
 #define I2SC_SAM0_INIT(inst)    			        	\
-        PINCTRL_DT_INST_DEFINE(inst);					\
         static const struct i2sc_sam0_cfg i2sc_sam0_config_##inst = {	\
                 .regs = (I2s *)DT_INST_REG_ADDR(inst),			\
-                .pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(inst),		\
         };								\
         static struct i2sc_sam0_data i2sc_sam0_data_##inst = {		\
                 .mydata = 123,						\

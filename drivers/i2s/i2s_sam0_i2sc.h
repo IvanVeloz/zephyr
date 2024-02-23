@@ -21,7 +21,6 @@ extern "C" {
 /* i2sc configuration constants acquired through device tree */
 struct i2sc_sam0_cfg {
     I2s *regs;
-    const struct pinctrl_dev_config *pcfg;
 };
 /* i2sc variable data structure */
 struct i2sc_sam0_data {

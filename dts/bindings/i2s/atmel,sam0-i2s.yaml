@@ -8,10 +8,15 @@ compatible: "atmel,sam0-i2s"
 on-bus: atmel-sam0-i2sc
 bus: i2s
 
-include: [i2s-controller.yaml]
+include: [i2s-controller.yaml, pinctrl-device.yaml]
 
 properties:
+
   reg:
     required: true
 
+  pinctrl-0:
+    required: true
 
+  pinctrl-names:
+    required: true

@@ -95,7 +95,11 @@ static int i2s_sam0_initialize(const struct device *dev)
 		return -EINVAL;
 	}
 	LOG_DBG("REV_I2S = 0x%08x", REV_I2S);
-	return 0;
+
+	int ret;
+	ret = pinctrl_apply_state(cfg->pcfg, PINCTRL_STATE_DEFAULT);
+	LOG_DBG("pinctrl_apply_state returned %i",ret);
+	return ret;
 }
 
 static const struct i2s_driver_api i2s_sam0_driver_api = {
@@ -109,11 +113,13 @@ static const struct i2s_driver_api i2s_sam0_driver_api = {
 };
 
 #define I2S_SAM0_INIT(inst) 						\
+        PINCTRL_DT_INST_DEFINE(inst);					\
 	static const struct i2s_sam0_cfg i2s_sam0_config_##inst = {	\
 		/* Initialize ROM values as needed */			\
 		/* Get properties from the device tree using DT_inst_ */\
 		.serializer = DT_REG_ADDR(DT_INST(inst,DT_DRV_COMPAT)),	\
 		.i2sc = DEVICE_DT_GET(DT_INST_PARENT(inst)),		\
+                .pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(inst),		\
 	};								\
 	static struct i2s_sam0_data i2s_sam0_data_##inst = {		\
 		/* Initialize RAM values as needed */			\

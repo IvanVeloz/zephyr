@@ -17,6 +17,8 @@ extern "C" {
 struct i2s_sam0_cfg {
     const uint32_t serializer;          // Self's serializer address (0 to 1)
     const struct device *i2sc;          // Parent i2sc node
+    const struct pinctrl_dev_config *pcfg;  // Pin configuration structure
+
 };
 
 struct i2s_sam0_data {
