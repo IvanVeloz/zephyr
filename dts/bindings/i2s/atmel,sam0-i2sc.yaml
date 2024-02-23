@@ -1,0 +1,32 @@
+# Copyright 2024 Ivan Veloz
+# SPDX-License-Identifier: Apache-2.0
+
+description: Atmel SAM0 series I2S controller
+
+compatible: "atmel,sam0-i2sc"
+
+bus: atmel-sam0-i2sc
+
+include: [base.yaml, pinctrl-device.yaml]
+
+properties:
+
+  reg:
+    required: true
+
+  interrupts:
+    required: true
+
+  "#address-cells":
+    required: true
+    const: 1
+
+  "#size-cells":
+    required: true
+    const: 0
+
+  pinctrl-0:
+    required: true
+
+  pinctrl-names:
+    required: true

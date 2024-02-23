@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017 Google LLC.
+ * Copyright (c) 2024 Ivan Veloz
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -66,6 +67,29 @@
 
 			channels = <2>;
 			counter-size = <16>;
+		};
+
+		i2sc: i2sc@0x42005000 {
+			compatible = "atmel,sam0-i2sc";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0x42005000 0x38>;
+			interrupts = <15 0>;
+			status = "disabled";
+			i2s0: i2s@0 {
+				compatible = "atmel,sam0-i2s";
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <0>;
+				status = "disabled";
+			};
+			i2s1: i2s@1 {
+				compatible = "atmel,sam0-i2s";
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <1>;
+				status = "disabled";
+			};
 		};
 	};
 };

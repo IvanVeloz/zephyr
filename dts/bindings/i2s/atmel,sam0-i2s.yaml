@@ -1,0 +1,17 @@
+# Copyright 2024 Ivan Veloz
+# SPDX-License-Identifier: Apache-2.0
+
+description: Atmel SAM0 series I2S serializer unit
+
+compatible: "atmel,sam0-i2s"
+
+on-bus: atmel-sam0-i2sc
+bus: i2s
+
+include: [i2s-controller.yaml]
+
+properties:
+  reg:
+    required: true
+
+

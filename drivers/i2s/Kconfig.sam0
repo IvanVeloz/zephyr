@@ -1,0 +1,26 @@
+# Atmel SAM I2S bus driver configuration options
+
+# Copyright (c) 2024 Ivan Veloz
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig I2S_SAM0
+	bool "Atmel SAM0 MCU family I2S Bus Driver"
+	default y
+	depends on DT_HAS_ATMEL_SAM0_I2S_ENABLED
+	select CACHE_MANAGEMENT if CPU_HAS_DCACHE
+	select DMA
+	help
+	  Enable Inter Sound (I2S) bus driver for Atmel SAM0 MCU family based on
+	  the Inter-IC Sound Controller module. (Tested on Arduino Nano 33 IoT)
+
+if I2S_SAM0
+
+config I2S_SAM0_RX_BLOCK_COUNT
+	int "RX queue length"
+	default 4
+
+config I2S_SAM0_TX_BLOCK_COUNT
+	int "TX queue length"
+	default 4
+
+endif # I2S_SAM0
