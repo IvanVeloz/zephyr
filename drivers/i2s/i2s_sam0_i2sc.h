@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 Ivan Veloz
  * Copyright (c) 2017 Piotr Mienkowski
+ * Copyright (c) 2024 Ivan Veloz
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,11 +20,25 @@ extern "C" {
 
 /* i2sc configuration constants acquired through device tree */
 struct i2sc_sam0_cfg {
-    I2s *regs;
+    volatile I2s * const regs;
+
+#ifdef MCLK
+    volatile uint32_t * const mclk;
+    const uint32_t mclk_mask;
+    const uint16_t gclk_core_id;
+#else /* !MCLK */
+    const uint32_t pm_apbcmask;
+    const uint16_t gclk_clkctrl_id;
+#endif
+
+    const uint32_t i2sn;
+    const char * const * const i2s_name;
+//    const struct device * i2s[];
 };
 /* i2sc variable data structure */
 struct i2sc_sam0_data {
     int mydata;
+    volatile struct device ** i2s_dev;
 };
 
 /* Public APIs for the Atmel SAM0 I2S controller driver.
@@ -43,7 +57,7 @@ struct i2sc_sam0_data {
  */
 __subsystem struct i2sc_sam0_driver_api_t {
 	int (*configure)(const struct device *dev, enum i2s_dir dir,
-			 const struct i2s_config *cfg, uint32_t ser);
+			 const struct i2s_config *cfg, const struct device *child);
 	const struct i2s_config *(*config_get)(const struct device *dev,
 				  enum i2s_dir dir);
 	int (*read)(const struct device *dev, void **mem_block, size_t *size);
@@ -79,14 +93,14 @@ __subsystem struct i2sc_sam0_driver_api_t {
  * @retval -ENOSYS I2S_DIR_BOTH value is not supported.
  */
 __syscall int i2sc_configure(const struct device *dev, enum i2s_dir dir,
-			      const struct i2s_config *cfg, uint32_t ser);
+			      const struct i2s_config *cfg, const struct device *child);
 
 static inline int z_impl_i2sc_configure(const struct device *dev, 
-    enum i2s_dir dir, const struct i2s_config *cfg, uint32_t ser)
+    enum i2s_dir dir, const struct i2s_config *cfg, const struct device *child)
 {
     const struct i2sc_sam0_driver_api_t *api =
         (const struct i2sc_sam0_driver_api_t *)dev->api;
-    return api->configure(dev, dir, cfg, ser);
+    return api->configure(dev, dir, cfg, child);
 }
 
 #ifdef __cplusplus

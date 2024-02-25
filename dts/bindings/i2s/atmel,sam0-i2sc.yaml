@@ -24,3 +24,11 @@ properties:
   "#size-cells":
     required: true
     const: 0
+
+  clocks:
+    required: true
+
+  clock-names:
+    required: true
+    const: ["PM"]
+

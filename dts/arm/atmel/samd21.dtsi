@@ -76,11 +76,16 @@
 			reg = <0x42005000 0x38>;
 			interrupts = <15 0>;
 			status = "disabled";
+			clocks = <&pm 0x20 20>;
+			clock-names = "PM";
+
 			i2s0: i2s@0 {
 				compatible = "atmel,sam0-i2s";
 				#address-cells = <1>;
 				#size-cells = <0>;
 				reg = <0>;
+				clocks = <&gclk 0x23>;
+				clock-names = "GCLK";
 				status = "disabled";
 			};
 			i2s1: i2s@1 {
@@ -88,6 +93,8 @@
 				#address-cells = <1>;
 				#size-cells = <0>;
 				reg = <1>;
+				clocks = <&gclk 0x24>;
+				clock-names = "GCLK";
 				status = "disabled";
 			};
 		};

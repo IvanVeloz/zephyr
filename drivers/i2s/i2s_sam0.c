@@ -1,30 +1,8 @@
 /*
+ * Copyright (c) 2019 Derek Hageman <hageman@inthat.cloud>
  * Copyright (c) 2024 Ivan Veloz
  *
  * SPDX-License-Identifier: Apache-2.0
- */
-
-/*
- * The SAMD21 I2S peripheral has two I2S independently configurable serializers
- * sharing the same memory registers. They both support RX or TX modes and can 
- * be configured in any combination. This is an unusual architecture and it 
- * doesn´t fit the Zephyr API directly. Because of that, this initial 
- * implementation only supports configuring the I2S peripheral as 1 RX, 1 TX or 
- * 1 RX + 1 TX.
- * 
- * The SAMD21 also supports 1 TX + 1 TX and 1 RX + 1 RX, but this would need an
- * intermediate abstraction layer or an API extension.
- * 
- * If done as an abstraction layer, the abstraction has to present the one 
- * physical I2S Controller as two virtual I2S devices on the device tree.
- * Each virtual device can then be configured as either 1 TX or 1 RX. 
- * 
- * The abstraction could also allow a single virtual device to be configured as 
- * 1 RX + 1 TX, providing backwards compatibility. The second virtual device 
- * would be disabled.
- * 
- * I could make that driver in the future if time allows. But, if someone else 
- * wants to take this task before I start, please let me know.
  */
 
 #define DT_DRV_COMPAT atmel_sam0_i2s
@@ -42,12 +20,48 @@
 
 LOG_MODULE_REGISTER(i2s_sam0, CONFIG_I2S_LOG_LEVEL);
 
+static void wait_synchronization(I2s *regs)
+{
+#if defined(I2S_SYNCBUSY_MASK)
+	/* SYNCBUSY is a register */
+	while ((regs->SYNCBUSY.reg & I2S_SYNCBUSY_MASK) != 0) {
+	}
+#else
+#error Unsupported device
+#endif
+}
+
 static int i2s_sam0_configure(const struct device *dev, enum i2s_dir dir,
 			      const struct i2s_config *i2s_cfg)
 {
-	LOG_DBG("i2s_sam0_configure");
-	const struct i2s_sam0_cfg *cfg = dev->config;
-	return i2sc_configure(cfg->i2sc, dir, i2s_cfg, cfg->serializer);
+	const struct i2s_sam0_cfg *const cfg = dev->config;
+	struct i2s_sam0_data *const data = dev->data;
+
+	i2sc_configure(cfg->i2sc, dir, i2s_cfg, dev);
+
+	/*
+        uint8_t word_size;
+        uint8_t channels;
+        i2s_fmt_t format;
+        i2s_opt_t options;
+        uint32_t frame_clk_freq;
+        struct k_mem_slab *mem_slab;
+        size_t block_size;
+        int32_t timeout;
+	*/
+	/*
+	i2s_cfg.word_size = 16U;
+	i2s_cfg.channels = 2U;
+	i2s_cfg.format = I2S_FMT_DATA_FORMAT_I2S;
+	i2s_cfg.frame_clk_freq = 44100;
+	i2s_cfg.block_size = BLOCK_SIZE;
+	i2s_cfg.timeout = 2000;
+	i2s_cfg.options = I2S_OPT_FRAME_CLK_MASTER
+			| I2S_OPT_BIT_CLK_MASTER;
+	i2s_cfg.mem_slab = &tx_0_mem_slab;
+	*/
+	return 0;
+
 }
 
 static int i2s_sam0_read(const struct device *dev, void **mem_block, 
@@ -73,33 +87,12 @@ static int i2s_sam0_trigger(const struct device *dev, enum i2s_dir dir,
 
 static int i2s_sam0_initialize(const struct device *dev)
 {
-	const struct i2s_sam0_cfg *cfg = dev->config;
-	if(cfg->serializer > I2S_SER_NUM - 1) {
-		LOG_ERR("I2S serializer address 0x%08x out of range.",
-			cfg->serializer);
-		/*
-		 * Only two serializers are included in the I2S controller,
-		 * and the address range is from 0 to 1. So make sure the 
-		 * device tree for your SoC looks something like this:
-		 * 
-		 * i2sc: i2sc@0xabcd1234 {
-		 *	reg = <0xabcd1234 0x38>
-		 *	i2s0: i2s@0 {
-		 *		reg = <0>
-		 *	};
-		 *	i2s1: i2s@0 {
-		 *		reg = <1>
-		 *	};
-		 * }
-		 */
-		return -EINVAL;
-	}
-	LOG_DBG("REV_I2S = 0x%08x", REV_I2S);
-
+	const struct i2s_sam0_cfg *const cfg = dev->config;
+	struct i2s_sam0_data *const data = dev->data;
+	I2s *const i2s = cfg->regs;
 	int ret;
-	ret = pinctrl_apply_state(cfg->pcfg, PINCTRL_STATE_DEFAULT);
-	LOG_DBG("pinctrl_apply_state returned %i",ret);
-	return ret;
+
+	return 0;
 }
 
 static const struct i2s_driver_api i2s_sam0_driver_api = {
@@ -112,14 +105,16 @@ static const struct i2s_driver_api i2s_sam0_driver_api = {
 	//.buf_write = ,
 };
 
-#define I2S_SAM0_INIT(inst) 						\
+
+
+#define I2S_SAM0_INIT_INST(inst) 					\
         PINCTRL_DT_INST_DEFINE(inst);					\
 	static const struct i2s_sam0_cfg i2s_sam0_config_##inst = {	\
 		/* Initialize ROM values as needed */			\
 		/* Get properties from the device tree using DT_inst_ */\
-		.serializer = DT_REG_ADDR(DT_INST(inst,DT_DRV_COMPAT)),	\
+		.n = DT_REG_ADDR(DT_DRV_INST(inst)),		\
 		.i2sc = DEVICE_DT_GET(DT_INST_PARENT(inst)),		\
-                .pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(inst),		\
+		.regs = (I2s *)DT_REG_ADDR(DT_INST_PARENT(inst)),	\
 	};								\
 	static struct i2s_sam0_data i2s_sam0_data_##inst = {		\
 		/* Initialize RAM values as needed */			\
@@ -137,5 +132,5 @@ static const struct i2s_driver_api i2s_sam0_driver_api = {
 		&i2s_sam0_driver_api);
 
 
-DT_INST_FOREACH_STATUS_OKAY(I2S_SAM0_INIT)
+DT_INST_FOREACH_STATUS_OKAY(I2S_SAM0_INIT_INST)
 

@@ -13,6 +13,17 @@ include: [i2s-controller.yaml, pinctrl-device.yaml]
 properties:
 
   reg:
+    description: "Serializer instance to be used by this node."
+    required: true
+
+  secondary-serializer-reg:
+    type: int
+    description: "A secondary serializer instance (optional). If specified, it is used when I2S_DIR_BOTH is configured (primary serializer's SDm pin will be RX and secondary SDm will be TX)."
+
+  clocks:
+    required: true
+
+  clock-names:
     required: true
 
   pinctrl-0:
