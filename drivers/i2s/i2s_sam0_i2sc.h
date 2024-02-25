@@ -31,15 +31,17 @@ struct i2sc_sam0_cfg {
     const uint16_t gclk_clkctrl_id;
 #endif
 
-    const uint32_t i2sn;
-    const char * const * const i2s_name;
+    const uint32_t i2s_n;
+    //const char * const * const i2s_name;
+    const struct device * const * const i2s_dev;
+
 //    const struct device * i2s[];
 };
 /* i2sc variable data structure */
 struct i2sc_sam0_data {
     int mydata;
-    volatile struct device ** i2s_dev;
 };
+
 
 /* Public APIs for the Atmel SAM0 I2S controller driver.
  *
