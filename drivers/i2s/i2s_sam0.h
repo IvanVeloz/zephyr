@@ -18,19 +18,19 @@ extern "C" {
 
 /* Configuration constants acquired through device tree for device instance */
 const struct i2s_sam0_cfg {
-    const uint32_t n;                   // Self's serializer number (0 or 1)
-    const struct device *const i2sc;    // Parent i2sc node
-    volatile I2s * const regs;                   // i2s (controller) register
+	const uint32_t n;			// Self's serializer number (0 or 1)
+	const struct device *const i2sc;	// Parent i2sc node
+	volatile I2s * const regs;		// i2s (controller) register
 };
 /* Data variables for use by device instance*/
 struct i2s_sam0_data {
-    int mydata;
+ 	int mydata;
 };
 
 /* Constants, extension of the Atmel HAL */
-#define I2S_INTENCLR_MASK0      _U_(0x1111)
-#define I2S_INTENCLR_MASK1      (I2S_INTENCLR_MASK0 << 1)
-#define I2S_INTENCLR_MASKn(n)   (I2S_INTENCLR_MASK0 << (n))
+#define I2S_INTENCLR_MASK0	_U_(0x1111)
+#define I2S_INTENCLR_MASK1	(I2S_INTENCLR_MASK0 << 1)
+#define I2S_INTENCLR_MASKn(n)	(I2S_INTENCLR_MASK0 << (n))
 
 
 #ifdef __cplusplus
