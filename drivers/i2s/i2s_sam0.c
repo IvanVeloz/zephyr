@@ -67,7 +67,9 @@ static int i2s_sam0_configure(const struct device *dev, enum i2s_dir dir,
 static int i2s_sam0_read(const struct device *dev, void **mem_block, 
 			 size_t *size)
 {
+	const struct i2s_sam0_cfg *const cfg = dev->config;
 	LOG_DBG("i2s_sam0_read");
+	LOG_DBG("Self n: %i", cfg->n);
 	return -EIO;
 }
 
@@ -91,8 +93,10 @@ static int i2s_sam0_initialize(const struct device *dev)
 	struct i2s_sam0_data *const data = dev->data;
 	I2s *const i2s = cfg->regs;
 	int ret;
-
-	return 0;
+	ret = 0;
+	LOG_DBG("Self addr: %p",dev);
+	LOG_DBG("Self n: %i", cfg->n);
+	return ret;
 }
 
 static const struct i2s_driver_api i2s_sam0_driver_api = {

@@ -38,6 +38,7 @@
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/logging/log.h>
 
+#include "i2s_sam0.h"
 #include "i2s_sam0_i2sc.h"
 
 #define DT_DRV_COMPAT atmel_sam0_i2sc
@@ -62,6 +63,8 @@ static void refresh_bindings(const struct device *dev)
 	for(int i = 0; i < cfg->i2sn; i++) {
 		data->i2s_dev[i] = device_get_binding(cfg->i2s_name[i]);
 		LOG_DBG("Child %1x: %s %p",i,cfg->i2s_name[i],data->i2s_dev[i]);
+		LOG_DBG("n is %i",((struct i2s_sam0_cfg *)data->i2s_dev[i]->config)->n);
+		i2s_read(data->i2s_dev[i],NULL,NULL);
 	}
 }
 
@@ -109,6 +112,10 @@ static int i2sc_sam0_initialize(const struct device *dev)
 
 	LOG_DBG("API REV_I2S = 0x%08x", REV_I2S);
 	LOG_DBG("Detected %1x child(ren).", cfg->i2sn);
+	for(int i = 0; i < cfg->i2sn; i++) {
+		LOG_DBG("Child %1x: %s %p",i,cfg->i2s_name[i],data->i2s_dev[i]);
+		LOG_DBG("n is %i",((struct i2s_sam0_cfg *)data->i2s_dev[i]->config)->n);
+	}
 
 
 #ifdef MCLK
@@ -196,11 +203,11 @@ static const struct i2sc_sam0_cfg i2sc_sam0_config_##inst = {		\
 }
 #endif
 
-#define I2SC_SAM0_INIT(inst)    			        	\
+#define I2SC_SAM0_INIT_INST(inst)    			        	\
 	I2SC_SAM0_CONFIG(inst);						\
         static struct i2sc_sam0_data i2sc_sam0_data_##inst = {		\
                 .mydata = 123,						\
-		.i2s_dev = (struct device *) I2SC_SAM0_CHILDREN_ARRAY(inst)\
+		.i2s_dev = (struct device *[]) I2SC_SAM0_CHILDREN_ARRAY(inst)\
         };								\
                                                                         \
         DEVICE_DT_INST_DEFINE(inst, 					\
@@ -213,4 +220,4 @@ static const struct i2sc_sam0_cfg i2sc_sam0_config_##inst = {		\
                 &i2sc_sam0_driver_api);
 
 
-DT_INST_FOREACH_STATUS_OKAY(I2SC_SAM0_INIT)
+DT_INST_FOREACH_STATUS_OKAY(I2SC_SAM0_INIT_INST)
